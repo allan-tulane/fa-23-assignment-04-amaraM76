@@ -20,12 +20,62 @@ def MED(S, T):
 
 
 def fast_MED(S, T, MED={}):
-    # TODO -  implement top-down memoization
-    pass
+    if (S, T) in MED:
+        return MED[(S, T)]
+    if S == "":
+        result = len(T)
+    elif T == "":
+        result = len(S)
+    else:
+        if S[0] == T[0]:
+            result = fast_MED(S[1:], T[1:], MED)
+        else:
+            result = 1 + min(fast_MED(S, T[1:], MED), fast_MED(S[1:], T, MED))
+
+
+    MED[(S, T)] = result
+    return result
+
+
+for S, T in test_cases:
+    result = fast_MED(S, T)
+    print(result)
+
+
+for (S, T), alignment in zip(test_cases, alignments):
+    result = fast_MED(S, T)
+    print(result)
+
 
 def fast_align_MED(S, T, MED={}):
     # TODO - keep track of alignment
-    pass
+    if (S, T) in MED:
+        return MED[(S, T)]
+
+    if S == "":
+        result = len(T), '-' * len(T), T
+    elif T == "":
+        result = len(S), S, '-' * len(S)
+    else:
+        if S[0] == T[0]:
+            result = fast_align_MED(S[1:], T[1:], MED)
+        else:
+            del_cost, del_S, del_T = fast_align_MED(S, T[1:], MED)
+            ins_cost, ins_S, ins_T = fast_align_MED(S[1:], T, MED)
+            sub_cost, sub_S, sub_T = fast_align_MED(S[1:], T[1:], MED)
+
+
+            if del_cost <= ins_cost and del_cost <= sub_cost:
+                result = del_cost + 1, '-' + del_S, T[0] + del_T
+            elif ins_cost <= del_cost and ins_cost <= sub_cost:
+                result = ins_cost + 1, S[0] + ins_S, '-' + ins_T
+            else:
+                result = sub_cost + 1, S[0] + sub_S, T[0] + sub_T
+
+
+    MED[(S, T)] = result
+    return result
+
 
 def test_MED():
     for S, T in test_cases:
